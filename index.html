@@ -2,8 +2,7 @@
 <html lang="es">
 <head>
     <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juego de Ajedrez</title>
@@ -11,6 +10,7 @@
         body {
             text-align: center;
             font-family: Arial, sans-serif;
+            margin-top: 20px;
         }
         .chessboard {
             display: grid;
@@ -26,8 +26,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 28px;
             cursor: grab;
+            user-select: none;
         }
         .white { background-color: #f0d9b5; }
         .black { background-color: #b58863; }
@@ -36,25 +37,55 @@
 <body>
     <h1>Juego de Ajedrez</h1>
     <div class="chessboard" id="board"></div>
-    
+
     <script>
         const board = document.getElementById("board");
-        const pieces = {
-            '♜': 0, '♞': 1, '♝': 2, '♛': 3, '♚': 4, '♝': 5, '♞': 6, '♜': 7,
-            '♟': 8, '♙': 48,
-            '♖': 56, '♘': 57, '♗': 58, '♕': 59, '♔': 60, '♗': 61, '♘': 62, '♖': 63
-        };
-        
+
+        const initialBoard = [
+            "♜","♞","♝","♛","♚","♝","♞","♜",
+            "♟","♟","♟","♟","♟","♟","♟","♟",
+            "","","","","","","","",
+            "","","","","","","","",
+            "","","","","","","","",
+            "","","","","","","","",
+            "♙","♙","♙","♙","♙","♙","♙","♙",
+            "♖","♘","♗","♕","♔","♗","♘","♖"
+        ];
+
         function createBoard() {
             for (let i = 0; i < 64; i++) {
                 const square = document.createElement("div");
                 square.className = "square " + ((Math.floor(i / 8) + i) % 2 === 0 ? "white" : "black");
-                if (Object.values(pieces).includes(i)) {
-                    square.textContent = Object.keys(pieces).find(key => pieces[key] === i);
+                square.dataset.index = i;
+
+                const piece = initialBoard[i];
+                if (piece) {
+                    square.textContent = piece;
+                    square.draggable = true;
+
+                    square.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData("text/plain", i);
+                    });
                 }
+
+                square.addEventListener('dragover', (e) => e.preventDefault());
+
+                square.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const fromIndex = e.dataTransfer.getData("text/plain");
+                    const fromSquare = board.children[fromIndex];
+                    const toSquare = e.currentTarget;
+
+                    toSquare.textContent = fromSquare.textContent;
+                    toSquare.draggable = true;
+                    fromSquare.textContent = "";
+                    fromSquare.draggable = false;
+                });
+
                 board.appendChild(square);
             }
         }
+
         createBoard();
     </script>
 </body>
