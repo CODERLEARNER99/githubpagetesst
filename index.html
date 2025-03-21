@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Juego de Ajedrez</title>
     <style>
         body {
@@ -27,11 +27,11 @@
             align-items: center;
             justify-content: center;
             font-size: 28px;
-            cursor: grab;
             user-select: none;
         }
         .white { background-color: #f0d9b5; }
         .black { background-color: #b58863; }
+        .selected { outline: 3px solid red; }
     </style>
 </head>
 <body>
@@ -52,34 +52,29 @@
             "♖","♘","♗","♕","♔","♗","♘","♖"
         ];
 
+        let selectedSquare = null;
+
         function createBoard() {
+            board.innerHTML = "";
             for (let i = 0; i < 64; i++) {
                 const square = document.createElement("div");
                 square.className = "square " + ((Math.floor(i / 8) + i) % 2 === 0 ? "white" : "black");
                 square.dataset.index = i;
+                square.textContent = initialBoard[i];
 
-                const piece = initialBoard[i];
-                if (piece) {
-                    square.textContent = piece;
-                    square.draggable = true;
-
-                    square.addEventListener('dragstart', (e) => {
-                        e.dataTransfer.setData("text/plain", i);
-                    });
-                }
-
-                square.addEventListener('dragover', (e) => e.preventDefault());
-
-                square.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    const fromIndex = e.dataTransfer.getData("text/plain");
-                    const fromSquare = board.children[fromIndex];
-                    const toSquare = e.currentTarget;
-
-                    toSquare.textContent = fromSquare.textContent;
-                    toSquare.draggable = true;
-                    fromSquare.textContent = "";
-                    fromSquare.draggable = false;
+                square.addEventListener("click", () => {
+                    if (selectedSquare === null && square.textContent !== "") {
+                        selectedSquare = square;
+                        square.classList.add("selected");
+                    } else if (selectedSquare) {
+                        // mover pieza
+                        square.textContent = selectedSquare.textContent;
+                        initialBoard[+square.dataset.index] = selectedSquare.textContent;
+                        selectedSquare.textContent = "";
+                        initialBoard[+selectedSquare.dataset.index] = "";
+                        selectedSquare.classList.remove("selected");
+                        selectedSquare = null;
+                    }
                 });
 
                 board.appendChild(square);
